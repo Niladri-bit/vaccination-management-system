@@ -1,0 +1,108 @@
+/* Container styling */
+.vaccination-report-container {
+    padding: 20px;
+    background-color: #f0f4f8;
+  }
+  
+  /* Title styling */
+  .vaccination-report-title {
+    text-align: center;
+    color: #4a90e2;
+  }
+  
+  /* Filter Section Styling */
+  .filters {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .filter-item {
+    display: flex;
+    flex-direction: column;
+    margin-right: 20px;
+  }
+  
+  .filter-item label {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .filter-item input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 150px;
+  }
+  
+  .apply-filters-button {
+    background-color: #3498db;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .apply-filters-button:hover {
+    background-color: #2980b9;
+  }
+  
+  /* Table styling */
+  .vaccination-report-table {
+    width: 100%;
+    text-align: left;
+    border-radius: 8px;
+    border-color: #2980b9;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    border: 1px solid #2980b9;
+  }
+  
+  /* Header row styling */
+  .vaccination-report-table thead {
+    background-color: #3498db;
+    color: white;
+  }
+  
+  /* Table row styling */
+  .vaccination-report-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .vaccination-report-table tbody tr:nth-child(odd) {
+    background-color: #f1f1f1;
+  }
+  
+  /* No data message styling */
+  .no-data-message {
+    text-align: center;
+    padding: 15px;
+    color: #888;
+  }
+  
+  /* Pagination controls styling */
+  .pagination-controls {
+    margin-top: 20px;
+    text-align: center;
+  }
+  
+  .pagination-button {
+    padding: 8px 16px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .pagination-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .pagination-page-info {
+    margin: 0 15px;
+    font-size: 16px;
+  }
+  
