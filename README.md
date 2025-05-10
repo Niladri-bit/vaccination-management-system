@@ -23,7 +23,21 @@ Using VSCode
  
 •	It should open the browser and open the login page for vaccination management system
  
-•	Open postman and hit the register api as mentioned earlier by creating a proper payload .Currently this option is not available in UI so you have to do it in postman.This is only for admins and hence registering will give you admin priviledges which means you can access everything in UI.
+•	Open postman and hit the register api as mentioned earlier by creating a proper payload .
+Currently this option is not available in UI so you have to do it in postman.
+This is only for admins and hence registering will give you admin priviledges which means you can access everything in UI.
+ 
+ API - http://localhost:8080/auth/register
+ {
+	"userName": "chayan",
+	"email":"chayan@gmail.com",
+	"password" : "1234",
+	"firstName" : "chayan",
+	"lastName":"mathur",
+	"address":"kolkata joka"
+}
+
+Before hitting the api ,ensure you have started the user service backend in eclipse.
  
 •	Use the same username and password to login in the system. Once you enter the correct username and password and press login it should open the dashboard.
  
