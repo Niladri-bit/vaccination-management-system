@@ -2,72 +2,61 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { jsPDF } from "jspdf";
 import * as XLSX from "xlsx";
-import { autoTable } from 'jspdf-autotable';
-import '../css/VaccinationReport.css';  // Import the CSS file
+import { autoTable } from "jspdf-autotable";
+import "../css/VaccinationReport.css";
+
 jsPDF.autoTable = autoTable;
+
 const VaccinationReport = () => {
-  const [report, setReport] = useState([]);
   const [filteredReport, setFilteredReport] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Filter states
-  const [vaccineFilter, setVaccineFilter] = useState('');
-  const [classFilter, setClassFilter] = useState('');
-  const [selectedFormat, setSelectedFormat] = useState('');  // To store selected download format
+  const [vaccineFilter, setVaccineFilter] = useState("");
+  const [classFilter, setClassFilter] = useState("");
+  const [selectedFormat, setSelectedFormat] = useState("");
 
-  useEffect(() => {
-    fetchReport();
-  }, []);
-
-  const fetchReport = async () => {
+  const fetchReport = async (page = 0) => {
     try {
       const token = localStorage.getItem("token");
+
+      const params = {
+        page: page,
+        size: itemsPerPage,
+      };
+      if (vaccineFilter) params.vaccineName = vaccineFilter;
+      if (classFilter) params.studentClass = classFilter;
+
       const response = await axios.get("http://localhost:8082/vaccinations/report", {
         headers: { Authorization: `Bearer ${token}` },
+        params: params,
       });
-      setReport(response.data);
+
       setFilteredReport(response.data);
+      setCurrentPage(page + 1);
     } catch (error) {
       console.error("Error fetching vaccination report:", error);
     }
   };
 
-  // Apply filters
+  useEffect(() => {
+    fetchReport(0);
+  }, []);
+
   const applyFilters = () => {
-    let filteredData = [...report];
-    
-    if (vaccineFilter) {
-      filteredData = filteredData.filter(item =>
-        item.vaccineName.toLowerCase().includes(vaccineFilter.toLowerCase())
-      );
-    }
-
-    if (classFilter) {
-      filteredData = filteredData.filter(item =>
-        item.studentClass.toLowerCase().includes(classFilter.toLowerCase())
-      );
-    }
-
-    setFilteredReport(filteredData);
-    setCurrentPage(1); // Reset to first page when filters are applied
+    fetchReport(0);
   };
 
-  // Pagination logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredReport.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredReport.length / itemsPerPage);
-
   const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
+    fetchReport(currentPage); // currentPage is 1-based
   };
 
   const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+    if (currentPage > 1) {
+      fetchReport(currentPage - 2); // backend expects 0-based
+    }
   };
 
-  // Convert filtered report data to CSV format
   const downloadCSV = () => {
     const headers = [
       "First Name", "Last Name", "Class", "Email", "Vaccine", "Status", "Date"
@@ -98,7 +87,6 @@ const VaccinationReport = () => {
     document.body.removeChild(link);
   };
 
-  // Convert filtered report data to Excel format
   const downloadExcel = () => {
     const ws = XLSX.utils.json_to_sheet(filteredReport);
     const wb = XLSX.utils.book_new();
@@ -110,7 +98,7 @@ const VaccinationReport = () => {
     const doc = new jsPDF();
     doc.setFontSize(8);
     const headers = ["First Name", "Last Name", "Class", "Email", "Vaccine", "Status", "Date"];
-    
+
     const data = filteredReport.map(item => [
       item.firstName || "",
       item.lastName || "",
@@ -120,67 +108,51 @@ const VaccinationReport = () => {
       item.vaccinationStatus || "",
       item.vaccinationDate || "",
     ]);
-  
+
     const startX = 10;
     const startY = 20;
     const rowHeight = 10;
-  
-    const columnWidths = [25, 25, 20, 40, 25, 25, 25]; // make sure they fit within 180 total
-  
+    const columnWidths = [25, 25, 20, 40, 25, 25, 25];
     let y = startY;
-  
-    // Draw headers
+
     doc.setFont("helvetica", "bold");
     let x = startX;
     headers.forEach((header, i) => {
       doc.text(header, x, y);
       x += columnWidths[i];
     });
-  
-    // Draw rows
+
     doc.setFont("helvetica", "normal");
     y += rowHeight;
-  
+
     data.forEach(row => {
       x = startX;
       row.forEach((cell, i) => {
-        const text = typeof cell === "string" ? cell.substring(0, 20) : ""; // trim long text
+        const text = typeof cell === "string" ? cell.substring(0, 20) : "";
         doc.text(text, x, y);
         x += columnWidths[i];
       });
       y += rowHeight;
-  
-      // Move to next page if content overflows
       if (y > 280) {
         doc.addPage();
         y = startY + rowHeight;
       }
     });
-  
+
     doc.save("vaccination_report.pdf");
   };
-  
-  
-  
 
-  // Handle format selection and download
   const handleDownload = () => {
-    if (selectedFormat === "csv") {
-      downloadCSV();
-    } else if (selectedFormat === "excel") {
-      downloadExcel();
-    } else if (selectedFormat === "pdf") {
-      downloadPDF();
-    } else {
-      alert("Please select a format before downloading.");
-    }
+    if (selectedFormat === "csv") downloadCSV();
+    else if (selectedFormat === "excel") downloadExcel();
+    else if (selectedFormat === "pdf") downloadPDF();
+    else alert("Please select a format before downloading.");
   };
 
   return (
     <div className="vaccination-report-container">
       <h2 className="vaccination-report-title">Vaccination Report</h2>
 
-      {/* Filter Section */}
       <div className="filters">
         <div className="filter-item">
           <label>Vaccine Name: </label>
@@ -218,8 +190,8 @@ const VaccinationReport = () => {
           </tr>
         </thead>
         <tbody>
-          {currentItems.length > 0 ? (
-            currentItems.map((item, index) => (
+          {filteredReport.length > 0 ? (
+            filteredReport.map((item, index) => (
               <tr key={index}>
                 <td>{item.firstName}</td>
                 <td>{item.lastName}</td>
@@ -238,7 +210,6 @@ const VaccinationReport = () => {
         </tbody>
       </table>
 
-      {/* Download and Pagination Section */}
       <div className="download-pagination">
         <div className="download-section">
           <label>Download as: </label>
@@ -257,7 +228,6 @@ const VaccinationReport = () => {
           </button>
         </div>
 
-        {/* Pagination Controls */}
         <div className="pagination-controls">
           <button
             onClick={handlePrev}
@@ -267,11 +237,11 @@ const VaccinationReport = () => {
             Previous
           </button>
           <span className="pagination-page-info">
-            Page {currentPage} of {totalPages}
+            Page {currentPage}
           </span>
           <button
             onClick={handleNext}
-            disabled={currentPage === totalPages}
+            disabled={filteredReport.length < itemsPerPage}
             className="pagination-button"
           >
             Next
